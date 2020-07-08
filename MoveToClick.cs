@@ -8,6 +8,10 @@ public class MoveToClick : MonoBehaviour
 {
     private NavMeshAgent agent;
 
+    private void Start()
+    {
+        agent = GetComponent<NavMeshAgent>();
+    }
     void Update()
     {
         if (Input.GetMouseButton(0))
