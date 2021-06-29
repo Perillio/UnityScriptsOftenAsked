@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+// Player movement controller for objects with and without rigidbody. If rigidbody is found, the player can jump, else the player can move up and down.
+
 public class PlayerController : MonoBehaviour
 {
     
@@ -12,51 +15,18 @@ public class PlayerController : MonoBehaviour
         //Action code here ...
     }
 
-    public void DoJump()
-    {
-        Debug.Log("Boing!");
-        //Jump code here...
-    }
-
-
     //-------------------------------- ( DO NOT CHANGE AFTER HERE : ) -------------------------------------//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    [Header("Other Controls:")]
+    [Header("Controls:")]
     public KeyCode p_forward = KeyCode.W;
     public KeyCode p_backward = KeyCode.S;
     public KeyCode p_strafeLeft = KeyCode.A;
     public KeyCode p_strafeRight = KeyCode.D;
-
     public KeyCode p_up = KeyCode.Space;
     public KeyCode p_down = KeyCode.X;
     public KeyCode p_action = KeyCode.F;
     public bool isJumpInsteadUp = false;
+    public float jumpForce = 350f;
     [TextArea]
     public string important = "Rotation is handled by Mouse. Up and Down sight has to be done in camera ! (Also Zooming etc)";
 
@@ -79,27 +49,25 @@ public class PlayerController : MonoBehaviour
     private int frameCounter = 0;
     private int totalCounts = 0;
     private int totalFrames = 0;
+    private Rigidbody rb;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+   
     private void Awake()
     {
         lowestFPS = 99999;
+        try
+        {
+            rb = transform.GetComponent<Rigidbody>();
+            if (rb != null) { isJumpInsteadUp = true; } else { isJumpInsteadUp = false; }
+        }
+        catch 
+        {
+            isJumpInsteadUp = false;
+        }
+    }
+    public void DoJump()
+    {
+        rb.AddForce(new Vector3(0f, jumpForce, 0f), ForceMode.Acceleration);
     }
     void Update()
     {
@@ -116,9 +84,18 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(p_action)) { DoAction(); }
         Vector3 forward = transform.forward;
         Vector3 right = transform.right;
-        transform.position += right * (h * Time.deltaTime * speed);
-        transform.position += forward * (v * Time.deltaTime * speed);
-        transform.Rotate(0f,(Time.deltaTime * mx * mouseSensitivity), 0f);
+        if(rb != null) 
+        {
+            rb.position += right * (h * Time.deltaTime * speed);
+            rb.position += forward * (v * Time.deltaTime * speed);
+            transform.Rotate(0f, (Time.deltaTime * mx * mouseSensitivity), 0f);
+        }
+        else
+        {
+            transform.position += right * (h * Time.deltaTime * speed);
+            transform.position += forward * (v * Time.deltaTime * speed);
+            transform.Rotate(0f, (Time.deltaTime * mx * mouseSensitivity), 0f);
+        }
         if (isJumpInsteadUp)
         {
             if (Input.GetKeyDown(p_up))
